@@ -1,0 +1,2 @@
+Google maps API key (Geocoding) :
+AIzaSyCxu5ZZQN_aFcTLSTEdU_pohO9asLPwLIk
