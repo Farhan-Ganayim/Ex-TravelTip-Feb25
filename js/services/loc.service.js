@@ -36,9 +36,19 @@ export const locService = {
 function query() {
     return storageService.query(DB_KEY)
         .then(locs => {
+            console.log('Loaded locs from storage:', locs)
+            // if (gFilterBy.txt) {
+            //     const regex = new RegExp(gFilterBy.txt, 'i')
+            //     locs = locs.filter(loc => regex.test(loc.name))
+
+            // }
             if (gFilterBy.txt) {
-                const regex = new RegExp(gFilterBy.txt, 'i')
-                locs = locs.filter(loc => regex.test(loc.name))
+                const filterTxt = gFilterBy.txt.toLowerCase()
+                locs = locs.filter(loc => {
+                    const locName = loc.name.toLowerCase()
+                    const locGeoAdress = (loc.geo.address) ? loc.geo.address.toLowerCase() : ''
+                    return locName.includes(filterTxt) || locGeoAdress.includes(filterTxt)
+                })
             }
             if (gFilterBy.minRate) {
                 locs = locs.filter(loc => loc.rate >= gFilterBy.minRate)
@@ -55,9 +65,10 @@ function query() {
             } else if (gSortBy.name !== undefined) {
                 locs.sort((p1, p2) => p1.name.localeCompare(p2.name) * gSortBy.name)
             }
-            else if(gSortBy.createDate !== undefined){
-                locs.sort((p1,p2)=> (p1.createdAt-p2.createdAt)*gSortBy.createDate)
+            else if (gSortBy.createDate !== undefined) {
+                locs.sort((p1, p2) => (p1.createdAt - p2.createdAt) * gSortBy.createDate)
             }
+            // console.log(`locationssssss: ${locs}`)
 
             return locs
         })
