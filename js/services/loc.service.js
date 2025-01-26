@@ -30,7 +30,8 @@ export const locService = {
     save,
     setFilterBy,
     setSortBy,
-    getLocCountByRateMap
+    getLocCountByRateMap,
+    getLocCountByUpdatedGroup
 }
 
 function query() {
@@ -153,6 +154,30 @@ function _createLoc(loc) {
     loc.createdAt = loc.updatedAt = utilService.randomPastTime()
     return loc
 }
+
+function getLocCountByUpdatedGroup() {
+    return storageService.query(DB_KEY).then(locs => {
+        const now = new Date()
+        const groups = { today: 0, past: 0, never: 0 }
+
+        locs.forEach(loc => {
+            const updatedDate = new Date(loc.updatedAt)
+            const daysAgo = Math.floor((now - updatedDate) / (1000 * 60 * 60 * 24))
+
+            if (!loc.updatedAt) {
+                groups.never++
+            } else if (daysAgo === 0) {
+                groups.today++
+            } else {
+                groups.past++
+            }
+        })
+
+        groups.total = locs.length
+        return groups
+    })
+}
+
 
 
 // unused functions
