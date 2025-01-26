@@ -25,6 +25,13 @@ TravelTip is an app that keeps a list of favorite locations
 - Copy url to clipboard
 - Share via Web-Share API
 
+## Features Added in v2
+- **Add/Update Locations with Modal:** Users can add or update locations via a user-friendly modal dialog.
+- **Distance Display:** When the user’s position is known, the app displays the distance to each location in the list and details.
+- **Enhanced Filtering:** Locations can now be filtered by name or address.
+- **Sorting by Creation Time:** Users can sort locations by the time they were created, in ascending or descending order.
+- **Grouping by Last Updated:** Locations are grouped into categories (Today, Past, Never) based on their last updated time, with a pie chart visualization.
+
 ## Location
 Here is the format of the location object:
 ```js
