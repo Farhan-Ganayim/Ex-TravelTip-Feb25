@@ -20,6 +20,8 @@ window.app = {
     onSetFilterBy,
 }
 
+var gUserPos = null
+
 function onInit() {
     getFilterByFromQueryParams()
     loadAndRenderLocs()
@@ -49,6 +51,7 @@ function renderLocs(locs) {
         <li class="loc ${className}" data-id="${loc.id}">
             <h4>  
                 <span>${loc.name}</span>
+                 ${distanceStrHtml}
                 <span title="${loc.rate} stars">${'★'.repeat(loc.rate)}</span>
                 ${distance ? `<span>(${distance} km)</span>` : ''} 
             </h4>
@@ -69,6 +72,7 @@ function renderLocs(locs) {
     elLocList.innerHTML = strHTML || 'No locs to show'
 
     renderLocStats()
+    renderLocStatsByUpdated()
 
     if (selectedLocId) {
         const selectedLoc = locs.find(loc => loc.id === selectedLocId)
@@ -119,6 +123,7 @@ function onPanToUserPos() {
     mapService.getUserPosition()
         .then(latLng => {
             gUserPos = latLng
+            gUserPos = latLng
             mapService.panTo({ ...latLng, zoom: 15 })
             unDisplayLoc()
             loadAndRenderLocs()
@@ -156,6 +161,10 @@ function displayLoc(loc) {
     el.querySelector('.loc-name').innerText = loc.name
     el.querySelector('.loc-address').innerText = `${loc.geo.address} ${distance ? `(${distance} Km from your position)` : ''}`
     el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
+    if (gUserPos) {
+        const distance = utilService.getDistance(gUserPos, { lat: loc.geo.lat, lng: loc.geo.lng }, 'K')
+        el.querySelector('.loc-distance').innerText=`Distance: ${distance} km`
+    }
     el.querySelector('[name=loc-copier]').value = window.location
     el.classList.add('show')
 
@@ -201,7 +210,7 @@ function getFilterByFromQueryParams() {
     const queryParams = new URLSearchParams(window.location.search)
     const txt = queryParams.get('txt') || ''
     const minRate = queryParams.get('minRate') || 0
-    locService.setFilterBy({txt, minRate})
+    locService.setFilterBy({ txt, minRate })
 
     document.querySelector('input[name="filter-by-txt"]').value = txt
     document.querySelector('input[name="filter-by-rate"]').value = minRate
@@ -238,7 +247,7 @@ function onSetFilterBy({ txt, minRate }) {
 }
 
 function renderLocStats() {
-    locService.getLocCountByRateMap().then(stats => {
+       locService.getLocCountByRateMap().then(stats => {
         handleStats(stats, 'loc-stats-rate')
     })
     locService.getLocCountByUpdatedGroup().then(stats => {
