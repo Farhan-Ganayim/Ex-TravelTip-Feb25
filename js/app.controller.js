@@ -18,6 +18,8 @@ window.app = {
     onSetFilterBy,
 }
 
+var gUserPos = null
+
 function onInit() {
     getFilterByFromQueryParams()
     loadAndRenderLocs()
@@ -36,11 +38,18 @@ function renderLocs(locs) {
     const selectedLocId = getLocIdFromQueryParams()
 
     var strHTML = locs.map(loc => {
+        let distanceStrHtml = ''
+        if (gUserPos) {
+            const locationLatLng = { lat: loc.geo.lat, lng: loc.geo.lng }
+            const distance = utilService.getDistance(gUserPos, locationLatLng, 'K')
+            distanceStrHtml = `- Distance: ${distance} km`
+        }
         const className = (loc.id === selectedLocId) ? 'active' : ''
         return `
         <li class="loc ${className}" data-id="${loc.id}">
             <h4>  
                 <span>${loc.name}</span>
+                 ${distanceStrHtml}
                 <span title="${loc.rate} stars">${'★'.repeat(loc.rate)}</span>
             </h4>
             <p class="muted">
@@ -48,6 +57,7 @@ function renderLocs(locs) {
                 ${(loc.createdAt !== loc.updatedAt) ?
                 ` | Updated: ${utilService.elapsedTime(loc.updatedAt)}`
                 : ''}
+               
             </p>
             <div class="loc-btns">     
                <button title="Delete" onclick="app.onRemoveLoc('${loc.id}')">🗑️</button>
@@ -69,7 +79,7 @@ function renderLocs(locs) {
 }
 
 function onRemoveLoc(locId) {
-    const deleteConfirm=confirm('Are you sure you want to delete this location?')
+    const deleteConfirm = confirm('Are you sure you want to delete this location?')
     if (!deleteConfirm) return
     locService.remove(locId)
         .then(() => {
@@ -129,6 +139,7 @@ function loadAndRenderLocs() {
 function onPanToUserPos() {
     mapService.getUserPosition()
         .then(latLng => {
+            gUserPos = latLng
             mapService.panTo({ ...latLng, zoom: 15 })
             unDisplayLoc()
             loadAndRenderLocs()
@@ -180,6 +191,10 @@ function displayLoc(loc) {
     el.querySelector('.loc-name').innerText = loc.name
     el.querySelector('.loc-address').innerText = loc.geo.address
     el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
+    if (gUserPos) {
+        const distance = utilService.getDistance(gUserPos, { lat: loc.geo.lat, lng: loc.geo.lng }, 'K')
+        el.querySelector('.loc-distance').innerText=`Distance: ${distance} km`
+    }
     el.querySelector('[name=loc-copier]').value = window.location
     el.classList.add('show')
 
@@ -225,7 +240,7 @@ function getFilterByFromQueryParams() {
     const queryParams = new URLSearchParams(window.location.search)
     const txt = queryParams.get('txt') || ''
     const minRate = queryParams.get('minRate') || 0
-    locService.setFilterBy({txt, minRate})
+    locService.setFilterBy({ txt, minRate })
 
     document.querySelector('input[name="filter-by-txt"]').value = txt
     document.querySelector('input[name="filter-by-rate"]').value = minRate
