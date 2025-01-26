@@ -20,8 +20,6 @@ window.app = {
     onSetFilterBy,
 }
 
-var gUserPos = null
-
 function onInit() {
     getFilterByFromQueryParams()
     loadAndRenderLocs()
@@ -47,13 +45,14 @@ function renderLocs(locs) {
     var strHTML = locs.map(loc => {
         const distance = gUserPos ? utilService.getDistance(gUserPos,loc.geo, 'K') : null
         const className = (loc.id === selectedLocId) ? 'active' : ''
+        const distanceStrHtml = distance ? `<span>(${distance} Km from your current location)</span>` : ''
         return `
         <li class="loc ${className}" data-id="${loc.id}">
             <h4>  
                 <span>${loc.name}</span>
                  ${distanceStrHtml}
                 <span title="${loc.rate} stars">${'★'.repeat(loc.rate)}</span>
-                ${distance ? `<span>(${distance} km)</span>` : ''} 
+                ${distance ? `<span>(${distance} km from your location)</span>` : ''} 
             </h4>
             <p class="muted">
                 Created: ${utilService.elapsedTime(loc.createdAt)}
@@ -72,8 +71,7 @@ function renderLocs(locs) {
     elLocList.innerHTML = strHTML || 'No locs to show'
 
     renderLocStats()
-    renderLocStatsByUpdated()
-
+    
     if (selectedLocId) {
         const selectedLoc = locs.find(loc => loc.id === selectedLocId)
         displayLoc(selectedLoc)
