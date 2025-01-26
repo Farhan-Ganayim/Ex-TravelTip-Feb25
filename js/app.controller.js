@@ -43,7 +43,7 @@ function renderLocs(locs) {
     const selectedLocId = getLocIdFromQueryParams()
 
     var strHTML = locs.map(loc => {
-        const distance = gUserPos ? utilService.getDistance(loc.geo, 'K') : null
+        const distance = gUserPos ? utilService.getDistance(gUserPos,loc.geo, 'K') : null
         const className = (loc.id === selectedLocId) ? 'active' : ''
         return `
         <li class="loc ${className}" data-id="${loc.id}">
@@ -55,15 +55,15 @@ function renderLocs(locs) {
             <p class="muted">
                 Created: ${utilService.elapsedTime(loc.createdAt)}
                 ${(loc.createdAt !== loc.updatedAt) ?
-                ` | Updated: ${utilService.elapsedTime(loc.updatedAt)}`
-                : ''}
+                ` | Updated: ${utilService.elapsedTime(loc.updatedAt)}` : ''}
             </p>
             <div class="loc-btns">     
                <button title="Delete" onclick="app.onRemoveLoc('${loc.id}')">🗑️</button>
                <button title="Edit" onclick="app.onUpdateLoc('${loc.id}')">✏️</button>
                <button title="Select" onclick="app.onSelectLoc('${loc.id}')">🗺️</button>
             </div>     
-        </li>`}).join('')
+        </li>`
+    }).join('')
 
     const elLocList = document.querySelector('.loc-list')
     elLocList.innerHTML = strHTML || 'No locs to show'
@@ -152,10 +152,10 @@ function displayLoc(loc) {
     mapService.setMarker(loc)
 
     const el = document.querySelector('.selected-loc')
-    el.querySelector('.loc-name').innerText = loc.name
-    el.querySelector('.loc-address').innerText = loc.geo.address
-    el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
     const distance = gUserPos ? utilService.getDistance(gUserPos, loc.geo, 'K') : null
+    el.querySelector('.loc-name').innerText = loc.name
+    el.querySelector('.loc-address').innerText = `${loc.geo.address} ${distance ? `(${distance} Km from your position)` : ''}`
+    el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
     el.querySelector('[name=loc-copier]').value = window.location
     el.classList.add('show')
 
