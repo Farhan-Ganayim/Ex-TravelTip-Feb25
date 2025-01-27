@@ -45,14 +45,14 @@ function renderLocs(locs) {
     var strHTML = locs.map(loc => {
         const distance = gUserPos ? utilService.getDistance(gUserPos,loc.geo, 'K') : null
         const className = (loc.id === selectedLocId) ? 'active' : ''
-        const distanceStrHtml = distance ? `<span>(${distance} Km from your current location)</span>` : ''
+        const distanceStrHtml = distance ? `<span>Distance: ${distance} km</span>` : ''
         return `
         <li class="loc ${className}" data-id="${loc.id}">
             <h4>  
                 <span>${loc.name}</span>
                  ${distanceStrHtml}
                 <span title="${loc.rate} stars">${'★'.repeat(loc.rate)}</span>
-                ${distance ? `<span>(${distance} km from your location)</span>` : ''} 
+               
             </h4>
             <p class="muted">
                 Created: ${utilService.elapsedTime(loc.createdAt)}
@@ -157,7 +157,7 @@ function displayLoc(loc) {
     const el = document.querySelector('.selected-loc')
     const distance = gUserPos ? utilService.getDistance(gUserPos, loc.geo, 'K') : null
     el.querySelector('.loc-name').innerText = loc.name
-    el.querySelector('.loc-address').innerText = `${loc.geo.address} ${distance ? `(${distance} Km from your position)` : ''}`
+    el.querySelector('.loc-address').innerText = `${loc.geo.address}`
     el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
     if (gUserPos) {
         const distance = utilService.getDistance(gUserPos, { lat: loc.geo.lat, lng: loc.geo.lng }, 'K')
